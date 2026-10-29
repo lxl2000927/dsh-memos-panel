@@ -1,0 +1,14 @@
+node_modules/
+artifacts/
+coverage/
+*.tgz
+*.log
+.env
+.env.*
+!.env.example
+.dsh/
+settings*.yaml
+.credentials.yaml
+*.tmp
+.DS_Store
+Thumbs.db
