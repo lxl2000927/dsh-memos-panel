@@ -1,6 +1,6 @@
 # DSH MemOS 记忆配置面板
 
-**1.2.0 隐私筛选为预览版**，仅验证下表所列 Windows 环境，并要求 legacy Settings 兼容接口。请先核对兼容范围再安装。
+**1.2.1 隐私筛选为预览版**，仅验证下表所列 Windows 环境，并要求 legacy Settings 兼容接口。请先核对兼容范围再安装。
 
 为 **DeepSeek Harness（DSH）** 的官方 MemOS 云记忆插件提供中文设置界面，集中管理连接、召回、写入、知识库和请求参数。
 
@@ -8,7 +8,7 @@
 
 **配置入口：设置 → MemOS 记忆。** 插件详情页只展示插件信息。
 
-[下载 1.2.0 预览版](https://github.com/lxl2000927/dsh-memos-panel/releases/tag/v1.2.0) · [反馈问题](https://github.com/lxl2000927/dsh-memos-panel/issues) · [官方 DSH 参数说明](https://github.com/MemTensor/MemOS-Cloud-OpenClaw-Plugin/blob/main/packages/dsh/README.zh.md)
+[下载 1.2.1 预览版](https://github.com/lxl2000927/dsh-memos-panel/releases/tag/v1.2.1) · [反馈问题](https://github.com/lxl2000927/dsh-memos-panel/issues) · [官方 DSH 参数说明](https://github.com/MemTensor/MemOS-Cloud-OpenClaw-Plugin/blob/main/packages/dsh/README.zh.md)
 
 ## 功能
 
@@ -42,12 +42,12 @@ DSH 正在快速迭代。包的版本范围不等于所有版本均已实测。1
 1. 先在 DSH 插件管理中安装并启用 `@memtensor/memos-cloud-dsh-plugin`；必须为 0.1.2；其他版本的运行层尚未适配。
 2. 打开「插件 → 添加插件」，将下面的安装包直链填入「包名或地址」：
 
-`https://github.com/lxl2000927/dsh-memos-panel/releases/download/v1.2.0/dsh-memos-panel-1.2.0.tgz`
+`https://github.com/lxl2000927/dsh-memos-panel/releases/download/v1.2.1/dsh-memos-panel-1.2.1.tgz`
 
 3. 安装并启用面板后，完全退出并重新打开 DSH。
 4. 在「设置 → MemOS 记忆」中填写或检查配置。
 
-也可从 [1.2.0 Release](https://github.com/lxl2000927/dsh-memos-panel/releases/tag/v1.2.0) 下载 `.tgz`，在支持本地包的宿主中使用该包路径。Git 源安装可填写 `https://github.com/lxl2000927/dsh-memos-panel.git#v1.2.0`。
+也可从 [1.2.1 Release](https://github.com/lxl2000927/dsh-memos-panel/releases/tag/v1.2.1) 下载 `.tgz`，在支持本地包的宿主中使用该包路径。Git 源安装可填写 `https://github.com/lxl2000927/dsh-memos-panel.git#v1.2.1`。
 
 **本项目目前通过 GitHub 发布，未发布到 npm。** 仅输入 `dsh-memos-panel` 包名不能保证安装本项目，请使用上述链接。
 
@@ -56,7 +56,7 @@ DSH 正在快速迭代。包的版本范围不等于所有版本均已实测。1
 支持上述宿主接口的 Web Profile 可通过 CLI 添加同一个安装包：
 
 ```powershell
-dsh plugin --profile web add "https://github.com/lxl2000927/dsh-memos-panel/releases/download/v1.2.0/dsh-memos-panel-1.2.0.tgz"
+dsh plugin --profile web add "https://github.com/lxl2000927/dsh-memos-panel/releases/download/v1.2.1/dsh-memos-panel-1.2.1.tgz"
 ```
 
 随后重启对应的 DSH Web 服务。桌面 Profile 由桌面应用管理，请使用桌面插件界面安装。

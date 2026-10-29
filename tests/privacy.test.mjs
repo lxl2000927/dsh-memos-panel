@@ -35,6 +35,7 @@ test('custom rules are bounded literal text, support blocking and redaction, and
   assert.equal(inspectPayload({query:'visit internal.example.test and a+b'},policy).payload.query,'visit [自定义信息已移除] and [自定义信息已移除]');
   assert.throws(()=>validatePrivacy({customBlockTerms:['x'.repeat(257)]}));
   assert.equal(inspectPayload({query:'abc'}, {...policy,customBlockTerms:['.*']}).payload.query,'abc');
+  assert.equal(inspectPayload({query:'İ SECRET secret'}, {...policy,customRedactTerms:['secret']}).payload.query,'İ [自定义信息已移除] [自定义信息已移除]');
 });
 test('switches are explicit; oversize input, bad configuration and scan failures never allow fallback',()=>{
   assert.equal(inspectPayload({query:dummyKey},{privacyEnabled:false}).payload.query,dummyKey);
