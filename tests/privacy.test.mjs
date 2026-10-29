@@ -29,6 +29,13 @@ test('identity fields containing PII block requests instead of silently changing
   rejects({user_id:'someone@example.test',query:'ordinary'});
   rejects({user_id:'13800138000',query:'ordinary'});
 });
+test('plain and encoded personal information mixed in one field leaves no encoded residue',()=>{
+  for(const query of ['plain@example.test plus hidden%40example.test','13800138000 plus %31%33%39%31%32%33%34%35%36%37%38']){
+    const safe=inspectPayload({query}).payload.query;
+    assert.equal(safe,'[敏感信息已移除]');
+    assert(!decodeURIComponent(safe).includes('example.test'));
+  }
+});
 test('custom rules are bounded literal text, support blocking and redaction, and block wins',()=>{
   const policy={...PRIVACY_DEFAULTS,customBlockTerms:['客户名单'],customRedactTerms:['internal.example.test','a+b']};
   assert.throws(()=>inspectPayload({query:'查看客户名单'},policy),PrivacyBlocked);
