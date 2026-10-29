@@ -1,9 +1,9 @@
 {
   "name": "dsh-memos-panel",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "type": "module",
   "description": "Third-party Chinese settings panel for the official MemOS Cloud DSH plugin",
-  "license": "MIT",
+  "license": "MIT AND Apache-2.0",
   "author": "lxl2000927",
   "repository": {
     "type": "git",
@@ -16,11 +16,14 @@
   "exports": {
     ".": "./lib/index.js",
     "./client": "./client/client.js",
+    "./guarded-memos": "./lib/guarded-memos.js",
     "./package.json": "./package.json",
     "./locale/*.json": "./locale/*.json",
     "./icon": "./icon.svg"
   },
-  "files": ["lib", "client", "locale", "icon.svg", "cordis.patch.yml", "README.md"],
+  "files": ["lib", "client", "locale", "vendor", "icon.svg", "cordis.patch.yml", "README.md"],
+  "peerDependencies": {"@memtensor/memos-cloud-dsh-plugin": "0.1.2"},
+  "peerDependenciesMeta": {"@memtensor/memos-cloud-dsh-plugin": {"optional": true}},
   "dsh": {
     "bundle": {"patch": "./cordis.patch.yml"},
     "client": {

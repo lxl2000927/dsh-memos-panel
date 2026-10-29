@@ -1,3 +1,8 @@
 - insert:
     - id: memos-panel
       name: dsh-memos-panel
+- id: memos-cloud
+  disabled: true
+- insert:
+    - id: memos-cloud-guard
+      name: dsh-memos-panel/guarded-memos
