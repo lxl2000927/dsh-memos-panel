@@ -1,6 +1,6 @@
 # DSH MemOS 记忆配置面板
 
-**1.2.2 隐私筛选为预览版**，仅验证下表所列 Windows 环境，并要求 legacy Settings 兼容接口。请先核对兼容范围再安装。
+**1.2.3 隐私筛选为预览版**，已加入官方 Windows DSH 0.2.1-rc.5 的设置兼容适配。请先核对兼容范围再安装。
 
 为 **DeepSeek Harness（DSH）** 的官方 MemOS 云记忆插件提供中文设置界面，集中管理连接、召回、写入、知识库和请求参数。
 
@@ -8,7 +8,7 @@
 
 **配置入口：设置 → MemOS 记忆。** 插件详情页只展示插件信息。
 
-[下载 1.2.2 预览版](https://github.com/lxl2000927/dsh-memos-panel/releases/tag/v1.2.2) · [反馈问题](https://github.com/lxl2000927/dsh-memos-panel/issues) · [官方 DSH 参数说明](https://github.com/MemTensor/MemOS-Cloud-OpenClaw-Plugin/blob/main/packages/dsh/README.zh.md)
+[下载 1.2.3 预览版](https://github.com/lxl2000927/dsh-memos-panel/releases/tag/v1.2.3) · [反馈问题](https://github.com/lxl2000927/dsh-memos-panel/issues) · [官方 DSH 参数说明](https://github.com/MemTensor/MemOS-Cloud-OpenClaw-Plugin/blob/main/packages/dsh/README.zh.md)
 
 ## 功能
 
@@ -17,7 +17,7 @@
 - 分组标题整行可切换，带箭头和展开/收起文字；支持全部展开/收起，折叠时保留参数数量和待保存提示。顶部状态使用已保存配置。
 - 中文用途说明、字段名、默认/继承值、取值范围与关联条件。
 - 逐项或按组恢复默认，JSON 格式化与填写示例。
-- 批量保存前可检查和放弃草稿；通过宿主 Settings API 局部修改配置并检查版本冲突。
+- 批量保存前可检查和放弃草稿；局部修改配置并检查版本冲突。rc.5 使用面板内部的兼容层保留原有 MemOS 配置，不改写宿主程序。
 - API Key 输入留空会保留已有值；保存后不向浏览器回传已存密钥。
 - 连接测试使用固定查询，只返回成功状态与耗时。
 
@@ -25,14 +25,14 @@
 
 | 项目 | 当前状态 |
 | --- | --- |
-| 已验证环境 | Windows，DSH 桌面版 0.2.1-rc.3，官方 MemOS DSH 插件 0.1.2 |
-| 已验证环境的特殊情况 | 宿主安装了 legacy Settings 兼容层；面板会使用同一命名空间的最后一份描述及版本号 |
+| 已验证环境 | Windows，DSH 桌面版 0.2.1-rc.5，官方 MemOS DSH 插件 0.1.2 |
+| rc.5 设置适配 | 无需安装宿主补丁；面板内部为 MemOS 提供私有兼容层，沿用 `settings-legacy.yaml` 的原有 MemOS 段 |
 | 包声明的 DSH 范围 | `>=0.2.1-rc.2 <0.3.0-0`，范围内其他版本仍需验证 |
 | 源码打包/测试 | Node.js ≥24.9；运行时使用已安装官方插件的依赖 |
 | 宿主需要提供 | Settings 的 `describe/mutate`、Web Server、Connection 校验，以及设置页扩展插槽 |
 | 界面语言 | 中文；插件元信息提供中英文 |
 
-DSH 正在快速迭代。包的版本范围不等于所有版本均已实测。1.2.0 的隐私适配层要求宿主提供已验证的 legacy Settings `register` 兼容接口；未经修改的官方宿主及其他系统尚未独立验证，缺少此接口时停止 MemOS 请求。此仓库不修改 DSH SDK 或官方插件安装文件，也不替换全局 fetch。面板的 bundle 禁用原始 `memos-cloud` 运行条目，加入 `memos-cloud-guard`，沿用原来的 `memos-cloud` Settings 命名空间与账号参数。仅支持官方插件 0.1.2；版本不符时停止适配层，不自动退回未过滤请求。
+DSH 正在快速迭代。包的版本范围不等于所有版本均已实测。1.2.3 在缺少 legacy Settings `register` 接口时使用面板内部的兼容层：只读取并编辑既有 `settings-legacy.yaml` 中的 `memos-cloud` 段，打开面板和升级均不写入账号配置；保存时校验版本、保留其他配置段并原子替换文件。已有兼容接口的旧宿主沿用原接口。此仓库不修改 DSH SDK 或官方插件安装文件，也不替换全局 fetch。面板的 bundle 禁用原始 `memos-cloud` 运行条目，加入 `memos-cloud-guard`，沿用原来的 `memos-cloud` Settings 命名空间与账号参数。仅支持官方插件 0.1.2；版本不符或配置校验失败时停止 MemOS 请求，不自动退回未过滤请求。
 
 面板默认值依据 **DSH 插件 0.1.2**，OpenClaw 仅用于界面设计参考。OpenClaw 独有的二次模型过滤、每个 Agent 独立覆盖和整段会话采集不在此版本内。
 
@@ -43,12 +43,12 @@ DSH 正在快速迭代。包的版本范围不等于所有版本均已实测。1
 1. 先在 DSH 插件管理中安装并启用 `@memtensor/memos-cloud-dsh-plugin`；必须为 0.1.2；其他版本的运行层尚未适配。
 2. 打开「插件 → 添加插件」，将下面的安装包直链填入「包名或地址」：
 
-`https://github.com/lxl2000927/dsh-memos-panel/releases/download/v1.2.2/dsh-memos-panel-1.2.2.tgz`
+`https://github.com/lxl2000927/dsh-memos-panel/releases/download/v1.2.3/dsh-memos-panel-1.2.3.tgz`
 
 3. 安装并启用面板后，完全退出并重新打开 DSH。
 4. 在「设置 → MemOS 记忆」中填写或检查配置。
 
-也可从 [1.2.2 Release](https://github.com/lxl2000927/dsh-memos-panel/releases/tag/v1.2.2) 下载 `.tgz`，在支持本地包的宿主中使用该包路径。Git 源安装可填写 `https://github.com/lxl2000927/dsh-memos-panel.git#v1.2.2`。
+也可从 [1.2.3 Release](https://github.com/lxl2000927/dsh-memos-panel/releases/tag/v1.2.3) 下载 `.tgz`，在支持本地包的宿主中使用该包路径。Git 源安装可填写 `https://github.com/lxl2000927/dsh-memos-panel.git#v1.2.3`。
 
 **本项目目前通过 GitHub 发布，未发布到 npm。** 仅输入 `dsh-memos-panel` 包名不能保证安装本项目，请使用上述链接。
 
@@ -57,7 +57,7 @@ DSH 正在快速迭代。包的版本范围不等于所有版本均已实测。1
 支持上述宿主接口的 Web Profile 可通过 CLI 添加同一个安装包：
 
 ```powershell
-dsh plugin --profile web add "https://github.com/lxl2000927/dsh-memos-panel/releases/download/v1.2.2/dsh-memos-panel-1.2.2.tgz"
+dsh plugin --profile web add "https://github.com/lxl2000927/dsh-memos-panel/releases/download/v1.2.3/dsh-memos-panel-1.2.3.tgz"
 ```
 
 随后重启对应的 DSH Web 服务。桌面 Profile 由桌面应用管理，请使用桌面插件界面安装。

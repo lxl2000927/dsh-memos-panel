@@ -1227,7 +1227,7 @@ const installMemosLifecycle = (ctx, entry = {}, dependencies = {}) => {
 		return task;
 	};
 	ctx.inject(["settings"], (settingsCtx) => {
-		const settings = settingsCtx.settings;
+		const settings = dependencies.settings ?? settingsCtx.settings;
 		if (typeof settings.register !== "function") {
 			const failed = () => {
 				settingsError = /* @__PURE__ */ new Error("Legacy MemOS settings migration failed; check the preserved configuration in the profile and restart after fixing it");
