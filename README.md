@@ -8,7 +8,9 @@
 
 **配置入口：设置 → MemOS 记忆。** 插件详情页只展示插件信息。
 
-[下载 1.2.3 预览版](https://github.com/lxl2000927/dsh-memos-panel/releases/tag/v1.2.3) · [反馈问题](https://github.com/lxl2000927/dsh-memos-panel/issues) · [官方 DSH 参数说明](https://github.com/MemTensor/MemOS-Cloud-OpenClaw-Plugin/blob/main/packages/dsh/README.zh.md)
+**当前 rc.5 适配版：v1.2.3（预览）** · [下载安装包](https://github.com/lxl2000927/dsh-memos-panel/releases/download/v1.2.3/dsh-memos-panel-1.2.3.tgz) · [更新说明](https://github.com/lxl2000927/dsh-memos-panel/releases/tag/v1.2.3) · [反馈问题](https://github.com/lxl2000927/dsh-memos-panel/issues)
+
+GitHub 的 `Latest` 徽标用于非预览版本。使用 DSH 0.2.1-rc.5 时，请通过上方版本直链安装 1.2.3；隐私筛选仍保留预览标记。
 
 ## 功能
 
