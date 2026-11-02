@@ -1,6 +1,6 @@
 {
   "name": "dsh-memos-panel",
-  "version": "1.2.3",
+  "version": "1.2.8",
   "type": "module",
   "description": "Third-party Chinese settings panel for the official MemOS Cloud DSH plugin",
   "license": "MIT AND Apache-2.0",
@@ -10,8 +10,17 @@
     "url": "git+https://github.com/lxl2000927/dsh-memos-panel.git"
   },
   "homepage": "https://github.com/lxl2000927/dsh-memos-panel#readme",
-  "bugs": {"url": "https://github.com/lxl2000927/dsh-memos-panel/issues"},
-  "keywords": ["dsh-plugin", "deepseek-harness", "memos", "memory", "settings", "chinese"],
+  "bugs": {
+    "url": "https://github.com/lxl2000927/dsh-memos-panel/issues"
+  },
+  "keywords": [
+    "dsh-plugin",
+    "deepseek-harness",
+    "memos",
+    "memory",
+    "settings",
+    "chinese"
+  ],
   "main": "lib/index.js",
   "exports": {
     ".": "./lib/index.js",
@@ -21,16 +30,44 @@
     "./locale/*.json": "./locale/*.json",
     "./icon": "./icon.svg"
   },
-  "files": ["lib", "client", "locale", "vendor", "icon.svg", "cordis.patch.yml", "README.md"],
-  "peerDependencies": {"@memtensor/memos-cloud-dsh-plugin": "0.1.2"},
-  "peerDependenciesMeta": {"@memtensor/memos-cloud-dsh-plugin": {"optional": true}},
-  "dsh": {
-    "bundle": {"patch": "./cordis.patch.yml"},
-    "client": {
-      "platform": "web",
-      "inject": ["@deepseek-ai/dsh-client-ui-settings"]
+  "files": [
+    "lib",
+    "client",
+    "locale",
+    "vendor",
+    "icon.svg",
+    "cordis.patch.yml",
+    "README.md"
+  ],
+  "peerDependencies": {
+    "@memtensor/memos-cloud-dsh-plugin": "0.1.2"
+  },
+  "peerDependenciesMeta": {
+    "@memtensor/memos-cloud-dsh-plugin": {
+      "optional": true
     }
   },
-  "engines": {"node": ">=24.9", "dsh": ">=0.2.1-rc.2 <0.3.0-0"},
-  "scripts": {"test": "node --test tests/*.test.mjs"}
+  "devDependencies": {
+    "@memtensor/memos-cloud-dsh-plugin": "0.1.2"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "inject": [
+        "@deepseek-ai/dsh-client-ui-settings"
+      ]
+    }
+  },
+  "engines": {
+    "node": ">=24.9",
+    "dsh": ">=0.2.1-rc.2 <0.3.0-0"
+  },
+  "scripts": {
+    "test": "node --test tests/*.test.mjs",
+    "sync:styles": "node scripts/sync-client-style.mjs",
+    "check:styles": "node scripts/sync-client-style.mjs --check"
+  }
 }

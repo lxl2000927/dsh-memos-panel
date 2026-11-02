@@ -60,15 +60,15 @@ test('reset removes only chosen overrides while keeping keys and unrelated field
   await assert.rejects(f.controller.save({revision:4,values:{relativity:0.6},resetFields:['relativity']}),/同时修改/);
 });
 
-test('all 35 native fields are described and assigned to a valid section',()=>{
-  assert.equal(DISPLAY_FIELDS.length,35);
-  assert.equal(new Set(DISPLAY_FIELDS.map(field=>field.key)).size,35);
+test('all 35 native and six recall filter fields have a valid section',()=>{
+  assert.equal(DISPLAY_FIELDS.length,41);
+  assert.equal(new Set(DISPLAY_FIELDS.map(field=>field.key)).size,41);
   for(const field of DISPLAY_FIELDS){assert(field.hint);assert(GROUPS.some(group=>group.id===field.group));}
 });
 
 test('display fields match the installed official Config schema',{skip:!process.env.MEMOS_NATIVE_ENTRY},async()=>{
   const official=await import(pathToFileURL(process.env.MEMOS_NATIVE_ENTRY));
-  assert.deepEqual(DISPLAY_FIELDS.map(field=>field.key).sort(),Object.keys(official.Config.dict).sort());
+  assert.deepEqual(DISPLAY_FIELDS.filter(field=>!field.key.startsWith('recallFilter')).map(field=>field.key).sort(),Object.keys(official.Config.dict).sort());
 });
 
 test('the configuration page registers only under Settings, never in either plugin detail',async()=>{

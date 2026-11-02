@@ -59,12 +59,18 @@ test('privacy settings are separate and privacy-only saves do not mutate native 
   const settings={documentPath:join(root,'cordis.patch.yml'),writable:true,get:()=>structuredClone(native),describe:()=>[{ns:'memos-cloud',revision:7,user:{},base:{}}],mutate:()=>{nativeWrites++;}};
   const privacy=privacyFor({settings}),controller=createController({settings,privacy});
   const result=await controller.save({revision:7,privacyRevision:0,values:{customBlockTerms:['private project'],redactPhone:false}});
-  assert.equal(nativeWrites,0);assert.equal(result.values.redactPhone,false);assert.equal(result.fields.length,41);
+  assert.equal(nativeWrites,0);assert.equal(result.values.redactPhone,false);assert.equal(result.fields.length,47);
   const disk=await readFile(join(root,'memos-panel.privacy.json'),'utf8');assert(!disk.includes(native.apiKey));assert(!disk.includes(native.userId));
   assert.deepEqual(native,{apiKey:'synthetic-account-key',userId:'unchanged-user',apiKeyEnv:'EXISTING_REF',baseURL:'https://example.test/api'});
 });
 
 const hasUpstream=Boolean(process.env.MEMOS_NATIVE_ENTRY);
+
+test('ordinary short fields do not become an invented high-entropy token when joined',()=>{
+  const payload={parts:['abcDEFgh','12345678','ijklMNOP','qrstUVWX']};
+  assert.deepEqual(inspectPayload(payload).payload,payload);
+  rejects({query:payload.parts.join('')});
+});
 test('real bundle composition disables the original lifecycle and mounts only one guarded entry',{skip:!hasUpstream},async()=>{
   const require=createRequire(import.meta.url);
   const {applyEntryPatches}=require('@deepseek-ai/cordis-plugin-include');

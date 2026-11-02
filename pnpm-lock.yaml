@@ -1,0 +1,74 @@
+lockfileVersion: '9.0'
+
+settings:
+  autoInstallPeers: false
+  excludeLinksFromLockfile: false
+
+importers:
+
+  .:
+    devDependencies:
+      '@memtensor/memos-cloud-dsh-plugin':
+        specifier: 0.1.2
+        version: 0.1.2
+
+packages:
+
+  '@deepseek-ai/cosmokit@1.8.6':
+    resolution: {integrity: sha512-ZSD/fN52L498LBIOYwjIOlaLv5veY6ZEwI2yzvZUKQtctn0QAPqu8tKdJ+OF5+Tv6NBq1U+wJWH+QI6OGy5EvQ==}
+
+  '@deepseek-ai/schemastery@3.18.5':
+    resolution: {integrity: sha512-Mnobvqf9rHsZYv4g5edj5ddxS1oF1kIdSlz0DunUgnY3LWG5F26MqvH3YOOsSaodCgyzJ16OMN9O99/s5Crtdw==}
+
+  '@memtensor/memos-cloud-dsh-plugin@0.1.2':
+    resolution: {integrity: sha512-T19/lxmIG0bSIKAECOozi/IlK8wT578YtLksXPzDKM6Dkyi7PVJDZXGYdrQ7HqrM73DBxDcdhpF+TaJmtZYOhg==}
+    engines: {dsh: '>=0.1.0-rc.6 <0.3.0-0', node: ^22.19.0 || >=24.0.0}
+    peerDependencies:
+      '@deepseek-ai/cordis': ^4.0.1
+      '@deepseek-ai/dsh-agent': ^0.1.0-rc.6 || ^0.1.2-rc.1 || ^0.1.7-0 || ^0.2.0-0 || ^0.2.1-0
+      '@deepseek-ai/dsh-credentials': ^0.1.0-rc.6 || ^0.1.2-rc.1 || ^0.1.7-0 || ^0.2.0-0 || ^0.2.1-0
+      '@deepseek-ai/dsh-launch-environment': ^0.1.0-rc.6 || ^0.1.2-rc.1 || ^0.1.7-0 || ^0.2.0-0 || ^0.2.1-0
+      '@deepseek-ai/dsh-llm': ^0.1.0-rc.6 || ^0.1.2-rc.1 || ^0.1.7-0 || ^0.2.0-0 || ^0.2.1-0
+      '@deepseek-ai/dsh-session': ^0.1.0-rc.6 || ^0.1.2-rc.1 || ^0.1.7-0 || ^0.2.0-0 || ^0.2.1-0
+      '@deepseek-ai/dsh-settings': ^0.1.0-rc.6 || ^0.1.2-rc.1 || ^0.1.7-0 || ^0.2.0-0 || ^0.2.1-0
+    peerDependenciesMeta:
+      '@deepseek-ai/cordis':
+        optional: true
+      '@deepseek-ai/dsh-agent':
+        optional: true
+      '@deepseek-ai/dsh-credentials':
+        optional: true
+      '@deepseek-ai/dsh-launch-environment':
+        optional: true
+      '@deepseek-ai/dsh-llm':
+        optional: true
+      '@deepseek-ai/dsh-session':
+        optional: true
+      '@deepseek-ai/dsh-settings':
+        optional: true
+
+  '@standard-schema/spec@1.1.0':
+    resolution: {integrity: sha512-l2aFy5jALhniG5HgqrD6jXLi/rUWrKvqN/qJx6yoJsgKhblVd+iqqU4RCXavm/jPityDo5TCvKMnpjKnOriy0w==}
+
+  yaml@2.9.1:
+    resolution: {integrity: sha512-3NxN8+78OdzbT7C/WjGsyfPAtJaN3FNDsWxv7Y7mcDsT/oOmgW8BpyQQFFBnvZE3j9Y2Sdz1ULFLezL7Eb2yFw==}
+    engines: {node: '>= 14.6'}
+    hasBin: true
+
+snapshots:
+
+  '@deepseek-ai/cosmokit@1.8.6': {}
+
+  '@deepseek-ai/schemastery@3.18.5':
+    dependencies:
+      '@deepseek-ai/cosmokit': 1.8.6
+      '@standard-schema/spec': 1.1.0
+
+  '@memtensor/memos-cloud-dsh-plugin@0.1.2':
+    dependencies:
+      '@deepseek-ai/schemastery': 3.18.5
+      yaml: 2.9.1
+
+  '@standard-schema/spec@1.1.0': {}
+
+  yaml@2.9.1: {}

@@ -57,7 +57,7 @@ test('rc.5 private Settings adapter rejects malformed files and serializes confl
   assert.throws(()=>settings.describe(),/invalid/);
 });
 
-test('guarded entry applies on an unmodified rc.5 host API and uses the unchanged legacy account',{skip:!hasUpstream},async(t)=>{
+for(const mode of ['stock-rc5','purge-profile-home','purge-config-editor'])test(`guarded entry applies on ${mode} and retains the legacy account`,{skip:!hasUpstream},async(t)=>{
   const {apply,Config}=await import('../lib/guarded-memos.js');
   const home=await mkdtemp(join(tmpdir(),'memos-rc5-lifecycle-'));t.after(()=>rm(home,{recursive:true,force:true}));
   const requests=[];
@@ -67,11 +67,14 @@ test('guarded entry applies on an unmodified rc.5 host API and uses the unchange
   const text=JSON.stringify({'memos-cloud':{apiKey:'synthetic-legacy-key',userId:'legacy-owner-retained',baseURL:`http://127.0.0.1:${server.address().port}`,addEnabled:false}})+'\n';
   await writeFile(file,text);
   const events=new Map(),cleanup=[];
-  const native={documentPath:join(home,'profiles','desktop','cordis.patch.yml'),writable:true};
-  const ctx={settings:native,fiber:{},logger:()=>({warn:()=>{}}),get:name=>name==='profileContext'?{home}:name==='configEditor'?{entries:()=>[{options:{id:'memos-cloud',config:{}}}]}:name==='launchEnvironment'?{get:()=>undefined}:undefined,on:(name,fn)=>{events.set(name,fn);return()=>events.delete(name);},effect:fn=>{const dispose=fn();if(typeof dispose==='function')cleanup.push(dispose);return dispose;},inject:(_names,fn)=>fn(ctx)};
+  const stock=mode==='stock-rc5';
+  const {parseDocument}=createRequire(process.env.MEMOS_NATIVE_ENTRY)('yaml');
+  const native=stock?{documentPath:join(home,'profiles','desktop','cordis.patch.yml'),writable:true}:createLegacySettings({native:{writable:true},schema:Config,home,parseDocument});
+  if(!stock)delete native.documentPath;
+  const ctx={settings:native,fiber:{},logger:()=>({warn:()=>{}}),get:name=>name==='profileContext'?{home}:name==='configEditor'?{...(mode==='purge-config-editor'?{documentPath:file}:{}),entries:()=>[{options:{id:'memos-cloud',config:{}}}]}:name==='launchEnvironment'?{get:()=>undefined}:undefined,on:(name,fn)=>{events.set(name,fn);return()=>events.delete(name);},effect:fn=>{const dispose=fn();if(typeof dispose==='function')cleanup.push(dispose);return dispose;},inject:(_names,fn)=>fn(ctx)};
   t.after(async()=>{for(const fn of cleanup.reverse())await fn();});
   apply(ctx,Config({}));
-  assert.equal(native.register,undefined);
+  assert.equal(typeof native.register,stock?'undefined':'function');
   assert(privacyFor(ctx).guard.active);
   const session={id:'synthetic-rc5-session',header:{}};
   const decision={kind:'enter',messages:[{source:{kind:'user'},content:[{type:'text',text:'联系 demo@example.test'}]}]};

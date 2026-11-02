@@ -1,3 +1,5 @@
+import {filterRecallProjection} from '../lib/recall-filter.js';
+import {createHostRequire} from '../lib/host-sdk.js';
 // Derived from @memtensor/memos-cloud-dsh-plugin 0.1.2.
 // Apache-2.0; see vendor/LICENSE and SOURCE.md. Local changes add scoped privacy hooks.
 import { createRequire } from "node:module";
@@ -31,7 +33,7 @@ const createHostSdk = (requireModule) => {
 		}
 	};
 };
-const hostSdk = createHostSdk(upstreamRequire);
+const hostSdk = createHostSdk(createHostRequire(upstreamRequire));
 //#endregion
 //#region ../core/dist/filter.js
 const SOURCE_KEYS = /* @__PURE__ */ new Set([
@@ -795,7 +797,14 @@ const Config = z.object({
 	searchRetries: z.number().step(1).min(0).max(3).default(1),
 	addRetries: z.number().step(1).min(0).max(3).default(0),
 	allowPublic: z.boolean().default(false),
-	asyncMode: z.boolean().default(true)
+	asyncMode: z.boolean().default(true),
+	// LLM-based second pass over recalled items (OpenClaw parity, ported locally).
+	recallFilterEnabled: z.boolean().default(false),
+	recallFilterBaseUrl: z.string(),
+	recallFilterApiKey: z.string().role("secret"),
+	recallFilterModel: z.string(),
+	recallFilterTimeoutMs: z.number().step(1).min(100).max(6e4).default(6e3),
+	recallFilterFailOpen: z.boolean().default(true)
 });
 const liveMetadata = {
 	...Config.meta,
@@ -865,7 +874,13 @@ const normalizeConfig = (input = {}, environment) => {
 		searchRetries: integerInRange("searchRetries", config.searchRetries ?? 1, 0, 3),
 		addRetries: integerInRange("addRetries", config.addRetries ?? 0, 0, 3),
 		allowPublic: config.allowPublic ?? false,
-		asyncMode
+		asyncMode,
+		recallFilterEnabled: config.recallFilterEnabled ?? false,
+		...optionalString(config.recallFilterBaseUrl) === void 0 ? {} : { recallFilterBaseUrl: optionalString(config.recallFilterBaseUrl) },
+		...optionalString(config.recallFilterApiKey) === void 0 ? {} : { recallFilterApiKey: optionalString(config.recallFilterApiKey) },
+		...optionalString(config.recallFilterModel) === void 0 ? {} : { recallFilterModel: optionalString(config.recallFilterModel) },
+		recallFilterTimeoutMs: integerInRange("recallFilterTimeoutMs", config.recallFilterTimeoutMs ?? 6e3, 100, 6e4),
+		recallFilterFailOpen: config.recallFilterFailOpen ?? true
 	};
 };
 const resolveApiKey = async (config, accessors) => {
@@ -1303,9 +1318,12 @@ const installMemosLifecycle = (ctx, entry = {}, dependencies = {}) => {
 				maxTotalChars: config.maxRecallChars
 			});
 			if (projection === void 0) return decision;
+			const filtered = await trackSearch(filterRecallProjection(config, query, projection, dependencies.fetcher ?? globalThis.fetch, signal, dependencies.redactText === void 0 ? void 0 : value => dependencies.redactText(payload.agent.session, value), message => warnOnce("filter", new MemosClientError(message, {kind:"filter"}))));
+			if (!accepting || payload.signal.aborted || lifecycle.signal.aborted) return decision;
+			if (filtered === void 0) return decision;
 			return {
 				...decision,
-				messages: insertRecallBeforeDirectUser(decision.messages, createRecallMessage(projection))
+				messages: insertRecallBeforeDirectUser(decision.messages, createRecallMessage(filtered))
 			};
 		} catch (error) {
 			if (payload.signal.aborted || lifecycle.signal.aborted) return decision;
@@ -1399,4 +1417,4 @@ const apply = (ctx, config) => {
 	installMemosLifecycle(ctx, config);
 };
 //#endregion
-export { MemosClient, MemosClientError, RuntimeConfig as Config, MEMOS_SETTINGS_NAMESPACE, apply, inject, installMemosLifecycle, name };
+export { MemosClient, MemosClientError, RuntimeConfig as Config, MEMOS_SETTINGS_NAMESPACE, apply, filterRecallProjection, inject, installMemosLifecycle, name };
