@@ -1,4 +1,5 @@
 import {filterRecallProjection} from '../lib/recall-filter.js';
+import {fitRecallBudget,candidateBudget,compactWriteMessages} from '../lib/memory-quality.js';
 import {createHostRequire} from '../lib/host-sdk.js';
 // Derived from @memtensor/memos-cloud-dsh-plugin 0.1.2.
 // Apache-2.0; see vendor/LICENSE and SOURCE.md. Local changes add scoped privacy hooks.
@@ -553,7 +554,7 @@ const projectRecall = (data, limits) => {
 	const facts = [];
 	const preferences = [];
 	const tools = [];
-	let remaining = Math.max(0, limits.maxTotalChars);
+	let remaining = limits.fairBudget ? Infinity : Math.max(0, limits.maxTotalChars);
 	const takeText = (value) => {
 		const text = nonBlank(value);
 		if (text === void 0 || remaining === 0) return void 0;
@@ -588,11 +589,12 @@ const projectRecall = (data, limits) => {
 		preferences,
 		tools
 	].every((items) => items.length === 0)) return;
-	return {
+	const projection = {
 		facts,
 		preferences,
 		...tools.length === 0 ? {} : { tools }
 	};
+	return limits.fairBudget ? fitRecallBudget(projection,limits.maxTotalChars) : projection;
 };
 //#endregion
 //#region src/capture.ts
@@ -1315,7 +1317,8 @@ const installMemosLifecycle = (ctx, entry = {}, dependencies = {}) => {
 			if (payload.signal.aborted || lifecycle.signal.aborted) return decision;
 			const projection = projectRecall(data, {
 				maxItemChars: dependencies.maxRecallItemChars ?? Math.min(config.maxItemChars, config.maxRecallChars),
-				maxTotalChars: config.maxRecallChars
+				maxTotalChars: config.recallFilterEnabled ? candidateBudget(config) : config.maxRecallChars,
+				fairBudget: config.recallFilterEnabled
 			});
 			if (projection === void 0) return decision;
 			const filtered = await trackSearch(filterRecallProjection(config, query, projection, dependencies.fetcher ?? globalThis.fetch, signal, dependencies.redactText === void 0 ? void 0 : value => dependencies.redactText(payload.agent.session, value), message => warnOnce("filter", new MemosClientError(message, {kind:"filter"}))));
@@ -1350,12 +1353,12 @@ const installMemosLifecycle = (ctx, entry = {}, dependencies = {}) => {
 		if (seen.has(event.data.turn)) return;
 		const events = readSessionEvents(session);
         if (dependencies.screenTurn && !dependencies.screenTurn(session, captureTurn(events, event.seq, {includeAssistant: true, includeToolMemory: config.includeToolMemory, maxMessageChars: Number.MAX_SAFE_INTEGER}))) return;
-        const messages = captureTurn(events, event.seq, {
+        const messages = compactWriteMessages(captureTurn(events, event.seq, {
 			includeAssistant: config.includeAssistant,
 			includeToolMemory: config.includeToolMemory,
 			maxMessageChars: config.maxMessageChars,
             transformText: text => dependencies.redactText ? dependencies.redactText(session, text) : text
-		});
+        }));
 		if (messages === void 0) return;
 		seen.add(event.data.turn);
 		processedTurns.set(session, seen);

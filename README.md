@@ -1,14 +1,19 @@
 # DSH MemOS 记忆配置面板
 
-**v1.2.8 · RC5 / Purge 兼容与界面优化版**
+**v1.2.9 · 记忆质量优化版**
 
 为 DeepSeek Harness 的 [MemOS 云记忆插件](https://github.com/MemTensor/MemOS-Cloud-OpenClaw-Plugin/tree/main/packages/dsh)提供中文配置界面、本地隐私筛选和可选的召回二次筛选。这是独立维护的第三方插件，不属于 DeepSeek、MemTensor 或 Purge 官方项目。
 
 **配置入口：设置 → MemOS 记忆。** 插件详情页只展示插件信息。
 
-[下载 v1.2.8](https://github.com/lxl2000927/dsh-memos-panel/releases/tag/v1.2.8) · [更新记录](CHANGELOG.md) · [反馈问题](https://github.com/lxl2000927/dsh-memos-panel/issues)
+[下载 v1.2.9](https://github.com/lxl2000927/dsh-memos-panel/releases/tag/v1.2.9) · [更新记录](CHANGELOG.md) · [反馈问题](https://github.com/lxl2000927/dsh-memos-panel/issues)
 
 ## 当前版本
+
+- 筛选优先用户明确更正，区分最新状态和历史对照；时间信息只辅助判断，存储时间不当作事实生效时间。
+- 精确重复候选在本地去重，事实和偏好分别获得候选预算；二次筛选后再次执行最终注入预算。筛选关闭时沿用原有召回行为。
+- 保留助手实质回答；仅跳过能在当前用户消息里找到完整对应内容的短记忆确认语。不会删除既有云端记忆。
+- 1.2.9 本地完整回归 71 项通过（无跳过）；新增候选预算、写回去重、否定/数字/操作符保留与生命周期检查。实际筛选对照保留必要历史、减少重复；不保证每次模型语义筛选完全一致。
 
 - 35 项上游参数、6 项召回筛选和 6 项隐私设置，共 **47 项、8 个分类**。默认展示 7 项常用设置，所有分类入口平铺可见。
 - 中文名称在左、英文参数名在右；正文与输入 15px、说明 14px。分组支持平滑展开、收起及待保存提示，折叠保留草稿。
@@ -23,7 +28,7 @@
 | 项目 | 范围与验证 |
 | --- | --- |
 | DSH | Windows 桌面版 0.2.1-rc.5 |
-| Purge | RC5 + dsh-purge 1.1.88 本机验证；不要求安装 Purge |
+| Purge | RC5 + dsh-purge 1.1.90 本机验证；不要求安装 Purge |
 | 原生 RC5 | 无旧 Settings 注册接口的生命周期回归通过 |
 | MemOS 上游 | 固定 `@memtensor/memos-cloud-dsh-plugin` **0.1.2** |
 | 其他宿主版本 | 声明范围 `>=0.2.1-rc.2 <0.3.0-0`，不代表逐一实测 |
@@ -38,12 +43,12 @@ bundle 会停用原始 `memos-cloud` 生命周期条目，改为运行本包的 
 1. 在 DSH 中安装并启用 `@memtensor/memos-cloud-dsh-plugin`，版本须为 **0.1.2**。
 2. 打开「插件 → 添加插件」，使用安装包直链：
 
-   `https://github.com/lxl2000927/dsh-memos-panel/releases/download/v1.2.8/dsh-memos-panel-1.2.8.tgz`
+   `https://github.com/lxl2000927/dsh-memos-panel/releases/download/v1.2.9/dsh-memos-panel-1.2.9.tgz`
 
 3. 更新已有面板时使用同一新版链接。安装完成后完全退出并重新打开 DSH，使后端生命周期重新加载。
 4. 在「设置 → MemOS 记忆」检查连接状态和配置。旧账号与 Key 会继续沿用，不要重新填写或更换用户 ID。
 
-也可从 [Release](https://github.com/lxl2000927/dsh-memos-panel/releases/tag/v1.2.8) 下载 `.tgz` 和 `.sha256` 后使用本地包安装。Git 源安装地址为 `https://github.com/lxl2000927/dsh-memos-panel.git#v1.2.8`。
+也可从 [Release](https://github.com/lxl2000927/dsh-memos-panel/releases/tag/v1.2.9) 下载 `.tgz` 和 `.sha256` 后使用本地包安装。Git 源安装地址为 `https://github.com/lxl2000927/dsh-memos-panel.git#v1.2.9`。
 
 **本项目通过 GitHub 发布，未发布到 npm。** 仅输入 `dsh-memos-panel` 不能保证安装的是本项目。
 
@@ -113,7 +118,7 @@ pnpm pack
 - `NODE_PATH`：DSH 安装目录内 `resources/app/dsh/node_modules`，供集成测试解析宿主 SDK。
 - `DSH_TEST_HOST_ENTRY`：同目录 `@deepseek-ai/dsh-desktop-host/lib/index.js` 的绝对路径；该项测试会在子进程清空 `NODE_PATH`，验证无 Profile SDK 链接时的回退。
 
-v1.2.8 完整回归 **63 项通过、无跳过**，覆盖接口适配、真实生命周期与本地假服务交互、账号保持、局部保存、密钥不回显、过滤取消/超时和 SDK 回退。实机界面已检查分类、搜索、展开/收起、中英文对齐及草稿保留；未声称实测所有窗口宽度和其他 DSH/Purge 版本。
+v1.2.9 完整回归 **71 项通过、无跳过**，覆盖接口适配、真实生命周期与本地假服务交互、账号保持、局部保存、密钥不回显、过滤取消/超时、SDK 回退和新增记忆质量规则。RC5 + Purge 1.1.90 的 DSH 对话框中完成了跨会话写入与召回、用户更正和历史对照测试。实机界面已检查分类、搜索、展开/收起、中英文对齐及草稿保留；未声称实测所有窗口宽度和其他 DSH/Purge 版本。
 
 样式源为 `client/panel.css`；修改后运行 `pnpm run sync:styles` 更新客户端内嵌样式。`pnpm pack` 不包含测试、开发依赖、本机配置或临时资料。
 
