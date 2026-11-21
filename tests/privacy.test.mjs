@@ -29,6 +29,30 @@ test('identity fields containing PII block requests instead of silently changing
   rejects({user_id:'someone@example.test',query:'ordinary'});
   rejects({user_id:'13800138000',query:'ordinary'});
 });
+test('only the configured whole account email is preserved in the top-level user ID',()=>{
+  const configuredUserId='13800138000@example.test';
+  const context={configuredUserId};
+  const result=inspectPayload({user_id:configuredUserId,query:configuredUserId,info:{contact:configuredUserId}},PRIVACY_DEFAULTS,context);
+  assert.deepEqual(result.payload,{user_id:configuredUserId,query:'[邮箱已移除]',info:{contact:'[邮箱已移除]'}});
+  assert.equal(result.redacted,2);
+  for(const input of [
+    {user_id:'another@example.test'},
+    {user_id:configuredUserId,info:{user_id:configuredUserId}},
+    {user_id:configuredUserId,agent_id:configuredUserId},
+  ])assert.throws(()=>inspectPayload(input,PRIVACY_DEFAULTS,context),PrivacyBlocked);
+  for(const id of ['13800138000','Owner <owner@example.test>']){
+    assert.throws(()=>inspectPayload({user_id:id},PRIVACY_DEFAULTS,{configuredUserId:id}),PrivacyBlocked);
+  }
+});
+test('the configured account email still goes through credential and custom rule checks',()=>{
+  const configuredUserId='owner@example.test';
+  const input={user_id:configuredUserId};
+  for(const settings of [{customBlockTerms:['example.test']},{customRedactTerms:['example.test']}]){
+    assert.throws(()=>inspectPayload(input,settings,{configuredUserId}),PrivacyBlocked);
+  }
+  const credentialEmail=`${dummyKey}@example.test`;
+  assert.throws(()=>inspectPayload({user_id:credentialEmail},PRIVACY_DEFAULTS,{configuredUserId:credentialEmail}),PrivacyBlocked);
+});
 test('plain and encoded personal information mixed in one field leaves no encoded residue',()=>{
   for(const query of ['plain@example.test plus hidden%40example.test','13800138000 plus %31%33%39%31%32%33%34%35%36%37%38']){
     const safe=inspectPayload({query}).payload.query;
@@ -82,15 +106,18 @@ test('real bundle composition disables the original lifecycle and mounts only on
   assert.deepEqual(result.find(entry=>entry.id==='memos-cloud').config,original.config);
   assert.equal(result.filter(entry=>entry.name==='dsh-memos-panel/guarded-memos'&&!entry.disabled).length,1);
 });
-test('real lifecycle: pre-truncation block, full-turn block, PII redaction, isolation and unchanged auth',{skip:!hasUpstream},async(t)=>{
+test('real lifecycle: configured account email, pre-truncation block, full-turn block, PII redaction and unchanged auth',{skip:!hasUpstream},async(t)=>{
   const {installGuardedLifecycle}=await import('../lib/guarded-memos.js');
   const captured=[];
   const server=http.createServer(async(req,res)=>{let body='';for await(const chunk of req)body+=chunk;captured.push({path:req.url,body:JSON.parse(body),authorization:req.headers.authorization});res.writeHead(200,{'content-type':'application/json'});res.end(JSON.stringify({code:0,data:req.url==='/search/memory'?{memory_detail_list:[]}: {}}));});
   await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));t.after(()=>{server.closeAllConnections();return new Promise(resolve=>server.close(resolve));});
   const events=new Map(),warnings=[],disposers=[];
-  const ctx={fiber:{},logger:()=>({warn:message=>warnings.push(message)}),get:name=>name==='launchEnvironment'?{get:()=>undefined}:undefined,inject:()=>{},on:(name,fn)=>{events.set(name,fn);return()=>events.delete(name);},effect:fn=>{const dispose=fn();if(typeof dispose==='function')disposers.push(dispose);return dispose;}};
+  const launchEnvironment={get:name=>name==='MEMOS_USER_ID'?{value:'env-owner@example.test'}:undefined};
+  const ctx={fiber:{},logger:()=>({warn:message=>warnings.push(message)}),get:name=>name==='launchEnvironment'?launchEnvironment:undefined,inject:()=>{},on:(name,fn)=>{events.set(name,fn);return()=>events.delete(name);},effect:fn=>{const dispose=fn();if(typeof dispose==='function')disposers.push(dispose);return dispose;}};
   const store={value:structuredClone(PRIVACY_DEFAULTS),error:false};const privacy={store,guard:new PrivacyGuard(store)};
-  const runtime=installGuardedLifecycle(ctx,{userId:'synthetic-owner',apiKey:'unchanged-auth-only',baseURL:`http://127.0.0.1:${server.address().port}`,maxQueryChars:16,maxMessageChars:12},privacy);
+  const accountEmail='owner@example.test';
+  const config={userId:accountEmail,apiKey:'unchanged-auth-only',baseURL:`http://127.0.0.1:${server.address().port}`,maxQueryChars:16,maxMessageChars:12};
+  const runtime=installGuardedLifecycle(ctx,config,privacy);
   t.after(async()=>{await runtime.dispose();});
   async function start(session,text){const decision={kind:'enter',messages:[{source:{kind:'user'},content:[{type:'text',text}]}]};await events.get('agent/pre-step')({agent:{session},step:1,signal:new AbortController().signal},async()=>decision);}
   function end(session,text,answer='ordinary answer'){
@@ -103,9 +130,26 @@ test('real lifecycle: pre-truncation block, full-turn block, PII redaction, isol
   const assistantBlocked={id:'assistant-blocked',header:{}};
   await start(assistantBlocked,'ordinary question');assert.equal(captured.length,1);end(assistantBlocked,'ordinary question','ordinary answer '.repeat(10)+'password=short');await runtime.drain();assert.equal(captured.length,1);
   const clean={id:'clean-session',header:{}};
-  await start(clean,'ordinary question');end(clean,'email demo@example.test','phone 13800138000');await runtime.drain();
-  const add=captured.find(entry=>entry.path==='/add/message');assert(add);assert.equal(add.authorization,'Token unchanged-auth-only');assert.equal(add.body.user_id,'synthetic-owner');assert(!JSON.stringify(add.body).includes('demo@example.test'));assert(!JSON.stringify(add.body).includes('13800138000'));
-  assert(!JSON.stringify(add.body).includes('demo@'));assert(!JSON.stringify(add.body).includes('138'));
+  await start(clean,`email ${accountEmail}`);end(clean,`email ${accountEmail}`,'phone 13800138000');await runtime.drain();
+  const search=captured.filter(entry=>entry.path==='/search/memory').at(-1);
+  assert.equal(search.body.user_id,accountEmail);
+  assert.equal(search.body.query,'email [邮箱已移除]');
+  assert.equal(search.authorization,'Token unchanged-auth-only');
+  const add=captured.find(entry=>entry.path==='/add/message');
+  assert(add);
+  assert.equal(add.authorization,'Token unchanged-auth-only');
+  assert.equal(add.body.user_id,accountEmail);
+  const messages=JSON.stringify(add.body.messages);
+  assert.match(messages,/\[邮箱已移除/);
+  assert(!messages.includes('owner@'));
+  assert(!messages.includes('138'));
   assert(!JSON.stringify(warnings).includes(dummyKey));assert(!JSON.stringify(warnings).includes('password=short'));
   assert.equal(captured.filter(entry=>entry.path==='/add/message').length,1);
+  const requestCount=captured.length;
+  config.userId='';
+  const fallback={id:'environment-session',header:{}};
+  await start(fallback,'ordinary question');
+  end(fallback,'ordinary question');
+  await runtime.drain();
+  assert.equal(captured.length,requestCount);
 });

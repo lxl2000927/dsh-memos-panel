@@ -834,7 +834,8 @@ const normalizeConfig = (input = {}, environment) => {
 		const message = error instanceof Error ? error.message : String(error);
 		throw new TypeError(`memos-cloud: ${message}`);
 	}
-	const userId = optionalString(config.userId) ?? environmentValue(environment, "MEMOS_USER_ID") ?? "deepseek-harness-user";
+	const configuredUserId = optionalString(config.userId);
+	const userId = configuredUserId ?? environmentValue(environment, "MEMOS_USER_ID") ?? "deepseek-harness-user";
 	const baseURL = (optionalString(config.baseURL) ?? "https://memos.memtensor.cn/api/openmem/v1").replace(/\/+$/, "");
 	const timeoutMs = integerInRange("timeoutMs", config.timeoutMs ?? 5e3, 100, MAX_SYNC_ADD_TIMEOUT_MS);
 	const searchTimeoutMs = integerInRange("searchTimeoutMs", config.searchTimeoutMs ?? Math.min(timeoutMs, 5e3), 100, SHORT_TIMEOUT_MS);
@@ -845,6 +846,7 @@ const normalizeConfig = (input = {}, environment) => {
 		apiKeyEnv: optionalString(config.apiKeyEnv) ?? "MEMOS_API_KEY",
 		baseURL,
 		userId,
+		configuredUserId,
 		recallEnabled: config.recallEnabled ?? true,
 		addEnabled: config.addEnabled ?? true,
 		includeAssistant: config.includeAssistant ?? true,

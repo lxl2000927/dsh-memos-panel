@@ -6,6 +6,7 @@ import {pathToFileURL} from 'node:url';
 import vm from 'node:vm';
 import {createController,registerRoutes} from '../lib/index.js';
 import {DISPLAY_FIELDS,GROUPS} from '../lib/config.js';
+import {PRIVACY_DEFAULTS,PrivacyGuard} from '../lib/privacy.js';
 
 function fixture(initial={}) {
   let config={recallEnabled:false,addEnabled:false,...initial};
@@ -92,19 +93,33 @@ test('bad input cannot change settings or send a secret to an insecure endpoint'
   assert.equal(f.read().memoryLimitNumber,undefined);
 });
 
-test('connectivity probe uses fixed synthetic text and no add endpoint',async()=>{
-  const f=fixture({apiKey:'test-token',userId:'test-user'});
+test('connectivity probe preserves a configured account email with privacy on and uses fixed synthetic text',async()=>{
+  const f=fixture({apiKey:'test-token',userId:'owner@example.test'});
   const calls=[];
-  const controller=createController({settings:f.settings,fetcher:async(url,options)=>{
+  const store={value:PRIVACY_DEFAULTS,error:false};
+  const privacy={store,guard:new PrivacyGuard(store)};
+  privacy.guard.active=true;
+  const controller=createController({settings:f.settings,privacy,fetcher:async(url,options)=>{
     calls.push({url,options});return {ok:true,json:async()=>({code:0,data:{memory_detail_list:[{memory_value:'sensitive-existing-memory'}]}})};
   }});
+  const state=await controller.state();
+  const account=state.fields.find(field=>field.key==='userId');
+  assert.equal(account.label,'账户邮箱 / 用户 ID');
+  assert.equal(account.group,'connection');
+  assert.equal(state.values.userId,'owner@example.test');
   const response=await controller.test({values:{}});
   assert.equal(calls.length,1);
   assert(calls[0].url.endsWith('/search/memory'));
   assert.equal(calls[0].options.headers.authorization,'Token test-token');
   assert.equal(calls[0].options.redirect,'error');
   assert.equal(JSON.parse(calls[0].options.body).query,'MemOS connectivity test');
+  assert.equal(JSON.parse(calls[0].options.body).user_id,'owner@example.test');
   assert(!JSON.stringify(response).includes('sensitive-existing-memory'));
+  await controller.test({values:{userId:'other@example.test'}});
+  assert.equal(JSON.parse(calls[1].options.body).user_id,'other@example.test');
+  await assert.rejects(controller.test({values:{userId:'13800138000'}}),/本地隐私筛选已阻止测试/);
+  assert.equal(calls.length,2);
+  assert.equal(f.read().userId,'owner@example.test');
 });
 
 test('routes require DSH session checks and never return raw exceptions',async(t)=>{
