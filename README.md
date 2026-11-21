@@ -1,19 +1,19 @@
 # DSH MemOS 记忆配置面板
 
-**v1.2.9 · 记忆质量优化版**
+**v1.2.10 · 账户邮箱兼容修复**
 
 为 DeepSeek Harness 的 [MemOS 云记忆插件](https://github.com/MemTensor/MemOS-Cloud-OpenClaw-Plugin/tree/main/packages/dsh)提供中文配置界面、本地隐私筛选和可选的召回二次筛选。这是独立维护的第三方插件，不属于 DeepSeek、MemTensor 或 Purge 官方项目。
 
 **配置入口：设置 → MemOS 记忆。** 插件详情页只展示插件信息。
 
-[下载 v1.2.9](https://github.com/lxl2000927/dsh-memos-panel/releases/tag/v1.2.9) · [更新记录](CHANGELOG.md) · [反馈问题](https://github.com/lxl2000927/dsh-memos-panel/issues)
+[下载 v1.2.10](https://github.com/lxl2000927/dsh-memos-panel/releases/tag/v1.2.10) · [更新记录](CHANGELOG.md) · [反馈问题](https://github.com/lxl2000927/dsh-memos-panel/issues)
 
 ## 当前版本
 
+- 「连接与鉴权」支持用账户邮箱作为记忆归属标识。隐私筛选开启时，该邮箱只在 MemOS 请求的 `user_id` 字段原样传递，出现在对话或工具内容里时照常脱敏。
 - 筛选优先用户明确更正，区分最新状态和历史对照；时间信息只辅助判断，存储时间不当作事实生效时间。
 - 精确重复候选在本地去重，事实和偏好分别获得候选预算；二次筛选后再次执行最终注入预算。筛选关闭时沿用原有召回行为。
 - 保留助手实质回答；仅跳过能在当前用户消息里找到完整对应内容的短记忆确认语。不会删除既有云端记忆。
-- 1.2.9 本地完整回归 71 项通过（无跳过）；新增候选预算、写回去重、否定/数字/操作符保留与生命周期检查。实际筛选对照保留必要历史、减少重复；不保证每次模型语义筛选完全一致。
 
 - 35 项上游参数、6 项召回筛选和 6 项隐私设置，共 **47 项、8 个分类**。默认展示 7 项常用设置，所有分类入口平铺可见。
 - 中文名称在左、英文参数名在右；正文与输入 15px、说明 14px。分组支持平滑展开、收起及待保存提示，折叠保留草稿。
@@ -27,9 +27,9 @@
 
 | 项目 | 范围与验证 |
 | --- | --- |
-| DSH | Windows 桌面版 0.2.1-rc.5 |
-| Purge | RC5 + dsh-purge 1.1.90 本机验证；不要求安装 Purge |
-| 原生 RC5 | 无旧 Settings 注册接口的生命周期回归通过 |
+| DSH | Windows 桌面版 0.2.2-rc.5 宿主 SDK 完整回归 |
+| Purge | v1.2.9 曾在 0.2.1-rc.5 + dsh-purge 1.1.90 验证；无需安装 Purge |
+| 原生 0.2.2-rc.5 | 无旧 Settings 注册接口的生命周期回归通过 |
 | MemOS 上游 | 固定 `@memtensor/memos-cloud-dsh-plugin` **0.1.2** |
 | 其他宿主版本 | 声明范围 `>=0.2.1-rc.2 <0.3.0-0`，不代表逐一实测 |
 | Node.js | ≥24.9 |
@@ -43,12 +43,12 @@ bundle 会停用原始 `memos-cloud` 生命周期条目，改为运行本包的 
 1. 在 DSH 中安装并启用 `@memtensor/memos-cloud-dsh-plugin`，版本须为 **0.1.2**。
 2. 打开「插件 → 添加插件」，使用安装包直链：
 
-   `https://github.com/lxl2000927/dsh-memos-panel/releases/download/v1.2.9/dsh-memos-panel-1.2.9.tgz`
+   `https://github.com/lxl2000927/dsh-memos-panel/releases/download/v1.2.10/dsh-memos-panel-1.2.10.tgz`
 
 3. 更新已有面板时使用同一新版链接。安装完成后完全退出并重新打开 DSH，使后端生命周期重新加载。
 4. 在「设置 → MemOS 记忆」检查连接状态和配置。旧账号与 Key 会继续沿用，不要重新填写或更换用户 ID。
 
-也可从 [Release](https://github.com/lxl2000927/dsh-memos-panel/releases/tag/v1.2.9) 下载 `.tgz` 和 `.sha256` 后使用本地包安装。Git 源安装地址为 `https://github.com/lxl2000927/dsh-memos-panel.git#v1.2.9`。
+也可从 [Release](https://github.com/lxl2000927/dsh-memos-panel/releases/tag/v1.2.10) 下载 `.tgz` 和 `.sha256` 后使用本地包安装。Git 源安装地址为 `https://github.com/lxl2000927/dsh-memos-panel.git#v1.2.10`。
 
 **本项目通过 GitHub 发布，未发布到 npm。** 仅输入 `dsh-memos-panel` 不能保证安装的是本项目。
 
@@ -57,7 +57,7 @@ Web Profile 可使用 `dsh plugin --profile web add <安装包地址>`；本版�
 ## 连接和记忆行为
 
 - **MemOS API Key**：在 [MemOS 控制台](https://memos-dashboard.openmem.net/cn/apikeys/)获取。输入框留空保留已有值。
-- **账户邮箱 / 用户 ID**（主分支待发布）：填写 MemOS 账户邮箱或自定义 ID，跨设备使用相同值即可访问同一份记忆。改填邮箱会切换记忆归属。API Key 用于服务鉴权。
+- **账户邮箱 / 用户 ID**可填写 MemOS 账户邮箱或自定义 ID，跨设备使用相同值即可访问同一份记忆。改填邮箱会切换记忆归属。API Key 用于服务鉴权。
 - **API 服务地址**：默认 `https://memos.memtensor.cn/api/openmem/v1`。其他服务需兼容 MemOS 请求；远端要求 HTTPS，本地回环地址可用 HTTP。
 - **回答前检索记忆**：每轮第一个模型步骤前召回并注入相关记忆。
 - **对话完成后保存记忆**：成功结束的当前轮按配置写入云端；是否包含助手回答、工具内容由对应开关控制。
@@ -90,7 +90,7 @@ Web Profile 可使用 `dsh plugin --profile web add <安装包地址>`；本版�
 - 截断前检查完整当前查询和选定的当前轮文本；命中凭据或自定义拦截词时阻止对应请求。
 - 脱敏后再应用字符预算，并复查最终请求体。系统提示词、推理内容和附件不进入记忆采集。
 - 自定义规则是有数量和长度限制的字面文本，不执行用户正则；拦截优先于脱敏。
-- 命中脱敏规则的身份字段会阻止请求，以免改写记忆归属。主分支允许「连接与鉴权」中填写的完整邮箱原样用于 MemOS 请求的 `user_id`。该邮箱仍受凭据与自定义规则检查，出现在对话或工具内容里时照常脱敏。服务鉴权所需的 Key 通过请求头传递。
+- 命中脱敏规则的身份字段会阻止请求，以免改写记忆归属。「连接与鉴权」中填写的完整邮箱可原样用于 MemOS 请求的 `user_id`。该邮箱仍受凭据与自定义规则检查，出现在对话或工具内容里时照常脱敏。服务鉴权所需的 Key 通过请求头传递。
 - 各字段的高熵检查独立运行，避免拼接多个普通字段后误判为令牌；结构化凭据仍检查相邻片段。
 
 规则可能漏报或误报，不能承诺零泄漏。隐私配置保存在定位到的配置目录内的 `memos-panel.privacy.json`，不混入 MemOS 原生配置。解析异常或检查预算超限时不放行该次请求。
@@ -118,7 +118,7 @@ pnpm pack
 - `NODE_PATH`：DSH 安装目录内 `resources/app/dsh/node_modules`，供集成测试解析宿主 SDK。
 - `DSH_TEST_HOST_ENTRY`：同目录 `@deepseek-ai/dsh-desktop-host/lib/index.js` 的绝对路径；该项测试会在子进程清空 `NODE_PATH`，验证无 Profile SDK 链接时的回退。
 
-v1.2.9 完整回归 **71 项通过、无跳过**，覆盖接口适配、真实生命周期与本地假服务交互、账号保持、局部保存、密钥不回显、过滤取消/超时、SDK 回退和新增记忆质量规则。RC5 + Purge 1.1.90 的 DSH 对话框中完成了跨会话写入与召回、用户更正和历史对照测试。实机界面已检查分类、搜索、展开/收起、中英文对齐及草稿保留；未声称实测所有窗口宽度和其他 DSH/Purge 版本。
+v1.2.10 在 Windows DSH 0.2.2-rc.5 宿主 SDK 上完整回归 **73 项通过、无跳过**，覆盖连接测试、召回、写回、正文脱敏、密钥不回显、接口适配和记忆质量规则。v1.2.9 曾在 0.2.1-rc.5 + Purge 1.1.90 中验证跨会话写入与召回、用户更正、历史对照和设置面板交互。
 
 样式源为 `client/panel.css`；修改后运行 `pnpm run sync:styles` 更新客户端内嵌样式。`pnpm pack` 不包含测试、开发依赖、本机配置或临时资料。
 
